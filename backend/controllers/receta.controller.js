@@ -1,4 +1,5 @@
-const { Receta } = require("../models");
+const { Receta, Ingrediente } = require("../models");
+
 
 const obtenerRecetas = async (request, response, next) => {
   try {
@@ -50,10 +51,32 @@ const actualizarReceta = async (request, response, next) => {
   }
 };
 
+// GRAMOS /1000 * PRECIOKG
+const costoTotal = async (request, response, next) => {
+  try {
+    const {ingredientes} = await Receta.findOne({nombre: request.params.receta});
+    const ingr = await Ingrediente.find({
+      nombre: {$in: ingredientes.map(i => i.nombre)} 
+    });
+    const total = {
+      costo: 0 
+    }
+    ingr.forEach(i => {
+      const {gramos} = ingredientes.find(ing => i.nombre === ing.nombre);
+      total.costo += ((gramos / 1000) * i.precioKg);
+    })
+    console.log(total)
+    response.json(total);
+  }
+  catch (error) {
+    console.log(error), next();
+  }
+}
 
 module.exports = {
     obtenerRecetas,
     agregarReceta,
     eliminarReceta,
-    actualizarReceta
+    actualizarReceta,
+    costoTotal
 }
