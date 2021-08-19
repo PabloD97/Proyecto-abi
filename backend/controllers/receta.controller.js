@@ -54,7 +54,7 @@ const actualizarReceta = async (request, response, next) => {
 // GRAMOS /1000 * PRECIOKG
 const costoTotal = async (request, response, next) => {
   try {
-    const {ingredientes} = await Receta.findOne({nombre: request.params.receta});
+    const {ingredientes} = await Receta.findOne({_id: request.params.id});
     const ingr = await Ingrediente.find({
       nombre: {$in: ingredientes.map(i => i.nombre)} 
     });
@@ -63,7 +63,8 @@ const costoTotal = async (request, response, next) => {
     }
     ingr.forEach(i => {
       const {gramos} = ingredientes.find(ing => i.nombre === ing.nombre);
-      total.costo += ((gramos / 1000) * i.precioKg);
+      console.log(i.esGramos);
+      total.costo += i.esGramos ? ((gramos / 1000) * i.precioKg) : ((gramos / 1) * i.precioKg) ;
     })
     console.log(total)
     response.json(total);
